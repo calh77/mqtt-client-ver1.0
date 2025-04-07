@@ -1,9 +1,9 @@
 import json
 import base64
 
-
 def mqtt_downlink_message_sender(client, deviceId, count):
-    downlinkPayloadByte = b'\x21' if count == 1 else b'\x11'
+    #downlinkPayloadByte = b'\x21' if count == 1 else b'\x11'
+    downlinkPayloadByte = b'\x21'
     downlinkPayload = {
         "downlinks": [
             {
@@ -16,6 +16,6 @@ def mqtt_downlink_message_sender(client, deviceId, count):
     }
 
     topic = f"v3/shchang-bme280-test@ttn/devices/{deviceId}/down/push"
-    client.publish(topic, json.dumps(downlinkPayload))
+    #client.publish(topic, json.dumps(downlinkPayload))
     print(f"[Downlink to {deviceId}] 0x{downlinkPayloadByte.hex()}")
 

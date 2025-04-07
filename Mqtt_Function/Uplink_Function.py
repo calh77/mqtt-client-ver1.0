@@ -7,6 +7,7 @@ import json
 import base64
 from dateutil import parser
 from collections import defaultdict
+from Downlink_Function import mqtt_downlink_message_sender
 
 device_data = defaultdict(lambda: {
     "count": 0,
@@ -43,6 +44,9 @@ def mqtt_uplink_message_handler(client, msg):
             humidity = decodedUplinkPayload.get('humidity', 'N/A')
             pressure = decodedUplinkPayload.get('pressure', 'N/A')
             print(f"[{deviceId}] Count={count}, Header=0x{uplinkDataHeader}, Temp={temperature}°C, AvrTemp={averageTemperature}°C, Humidity={humidity}%, Pressure={pressure}hPa")
+
+            if count%3 == 0 or count == 1:
+                mqtt_downlink_message_sender(client, deviceId, count)
 
     except Exception as e:
         print(f"Error: {str(e)}")

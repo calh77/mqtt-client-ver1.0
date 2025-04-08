@@ -2,7 +2,7 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-04-07 14:03:27
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-07 16:37:01
+# @Last Modified time: 2025-04-08 08:17:57
 import json
 import base64
 from dateutil import parser
@@ -46,22 +46,23 @@ def mqtt_uplink_message_handler(client, userdata, msg):
             print(f"[{deviceId}] Count={count}, Header=0x{uplinkDataHeader}, Temp={temperature}°C, AvrTemp={averageTemperature}°C, Humidity={humidity}%, Pressure={pressure}hPa")
 
             if count % 3 == 0 or count == 1:
-                #mqtt_downlink_message_sender(client, deviceId, count)
-                downlinkPayloadByte = b'\x21'
-                downlinkPayload = {
-                    "downlinks": [
-                        {
-                            "frm_payload": base64.b64encode(downlinkPayloadByte).decode('utf-8'),
-                            "f_port": 2,
-                            "confirmed": False,
-                            "priority": "NORMAL"
-                        }
-                    ]
-                }
+                mqtt_downlink_message_sender(client, deviceId, count)
+                print(f"device ID : {deviceId}, message cnt : {count}")
+#                downlinkPayloadByte = b'\x21'
+#                downlinkPayload = {
+#                    "downlinks": [
+#                        {
+#                            "frm_payload": base64.b64encode(downlinkPayloadByte).decode('utf-8'),
+#                            "f_port": 2,
+#                            "confirmed": False,
+#                            "priority": "NORMAL"
+#                        }
+#                    ]
+#                }
 
-                topic = f"v3/shchang-bme280-test@ttn/devices/{deviceId}/down/push"
-                client.publish(topic, json.dumps(downlinkPayload))
-                print(f"[Downlink to {deviceId}] 0x{downlinkPayloadByte.hex()}")
+#                topic = f"v3/shchang-bme280-test@ttn/devices/{deviceId}/down/push"
+#                client.publish(topic, json.dumps(downlinkPayload))
+#                print(f"[Downlink to {deviceId}] 0x{downlinkPayloadByte.hex()}")
 
     except Exception as e:
         print(f"Error: {str(e)}")

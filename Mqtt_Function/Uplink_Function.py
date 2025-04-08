@@ -7,14 +7,9 @@ import json
 import base64
 from dateutil import parser
 from collections import defaultdict
+
 from Mqtt_Function.Downlink_Function import mqtt_downlink_message_sender
-
-device_data = defaultdict(lambda: {
-    "count": 0,
-    "last_payload": {},
-    "last_time": None
-})
-
+from Store_Function.Device_Info import device_data
 
 def mqtt_uplink_message_handler(client, userdata, msg):
     try:

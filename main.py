@@ -4,8 +4,14 @@
 # @Last Modified by:   Your name
 # @Last Modified time: 2025-04-08 15:43:04
 import paho.mqtt.client as mqtt
+
 from Mqtt_Function.Uplink_Function import mqtt_uplink_message_handler
 from Display_Function.Device_Display_Manager import display_manager, display_sensor_data
+from Store_Function.Device_Info import device_data
+from Etc_Function.Device_Connection_Check import connectionManager
+
+# DataManager를 생성할 때, device_data를 "밖에서" 인자로 주입
+data_manager = connectionManager(device_data=device_data, check_interval=60, timeout_seconds=600)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -26,4 +32,8 @@ client.tls_set()  # TLS 활성화
 
 # 브로커 연결
 client.connect("au1.cloud.thethings.network", 8883, 60)
+
+# 오프라인 체크 시작
+data_manager.start_offline_checker()
+
 client.loop_forever()

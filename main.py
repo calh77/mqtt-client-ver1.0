@@ -2,9 +2,10 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-03-28 10:38:44
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-08 07:54:13
+# @Last Modified time: 2025-04-08 15:43:04
 import paho.mqtt.client as mqtt
 from Mqtt_Function.Uplink_Function import mqtt_uplink_message_handler
+from Display_Function.Device_Display_Manager import display_manager, display_sensor_data
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))

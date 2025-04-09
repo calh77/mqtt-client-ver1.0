@@ -2,7 +2,7 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-04-07 14:03:27
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-08 15:55:28
+# @Last Modified time: 2025-04-09 11:09:36
 import json
 import base64
 from dateutil import parser
@@ -32,6 +32,7 @@ def mqtt_uplink_message_handler(client, userdata, msg):
             device_data[deviceId]["count"] += 1
             device_data[deviceId]["last_payload"] = decodedUplinkPayload
             device_data[deviceId]["last_time"] = utcTime
+            device_data[deviceId]["on_line"] = True
 
             count = device_data[deviceId]["count"]
             temperature = decodedUplinkPayload.get('temperature', 'N/A')

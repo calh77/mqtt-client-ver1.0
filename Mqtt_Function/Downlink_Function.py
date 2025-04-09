@@ -2,7 +2,7 @@
 # @Author: Your name
 # @Date:   2025-04-08 07:51:06
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-08 08:28:44
+# @Last Modified time: 2025-04-09 09:10:26
 import json
 import base64
 
@@ -24,5 +24,5 @@ def mqtt_downlink_message_sender(client, deviceId, count):
 
     topic = f"v3/shchang-bme280-test@ttn/devices/{deviceId}/down/push"
     client.publish(topic, json.dumps(downlinkPayload))
-    print(f"[Downlink to {deviceId}] 0x{downlinkPayloadByte.hex()}")
+    print(f"[Downlink to {deviceId}] 0x{downlinkPayloadByte.hex()}\n")
 

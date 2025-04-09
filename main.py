@@ -2,16 +2,17 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-03-28 10:38:44
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-08 15:43:04
+# @Last Modified time: 2025-04-09 10:07:01
 import paho.mqtt.client as mqtt
 
 from Mqtt_Function.Uplink_Function import mqtt_uplink_message_handler
 from Display_Function.Device_Display_Manager import display_manager, display_sensor_data
 from Store_Function.Device_Info import device_data
 from Etc_Function.Device_Connection_Check import connectionManager
+from Define_Value.Constan_Value import constant
 
 # DataManager를 생성할 때, device_data를 "밖에서" 인자로 주입
-data_manager = connectionManager(device_data=device_data, check_interval=60, timeout_seconds=600)
+data_manager = connectionManager(device_data=device_data, check_interval=constant.CHECK_INTERVAL, timeout_seconds=constant.TIMEOUT_LIMIT)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))

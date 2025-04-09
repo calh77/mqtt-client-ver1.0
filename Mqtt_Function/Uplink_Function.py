@@ -14,6 +14,8 @@ from Store_Function.Device_Info import device_data
 
 def mqtt_uplink_message_handler(client, userdata, msg):
     try:
+        text_box = userdata["text_box"]  # ← 반드시 이렇게 꺼내야 사용 가능!
+        
         uplinkData = json.loads(msg.payload)
         if not uplinkData.get("uplink_message"):
             print("Ignoring uplink message..")
@@ -47,6 +49,21 @@ def mqtt_uplink_message_handler(client, userdata, msg):
             pressure = decodedUplinkPayload.get('pressure', 'N/A')
             print(koreaTime.strftime("%Y-%m-%d %H:%M:%S"))
             print(f"[{deviceId}] Count={count}, Header=0x{uplinkDataHeader}, Temp={temperature}°C, AvrTemp={averageTemperature}°C, Humidity={humidity}%, Pressure={pressure}hPa")
+
+            result = (
+                f"Data Received!!\n"
+                f"Device ID      : {deviceId}\n"
+                f"Receiving Time : {koreaTime.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Data Type(HEX) : {uplinkDataHeader}\n"
+                f"Temperature    : {temperature:.1f}\n"
+                f"Avg Temperature: {averageTemperature:.1f}\n"
+                f"Humidity       : {humidity:.1f}\n"
+                f"Pressure       : {pressure:.0f}\n\n"
+            )
+
+            text_box.insert("end", result)
+            text_box.see("end")
+
 
             if count % 3 == 0 or count == 1:
                 mqtt_downlink_message_sender(client, deviceId, count)

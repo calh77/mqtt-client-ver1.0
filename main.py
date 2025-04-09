@@ -11,7 +11,16 @@ from Display_Function.Device_Display_Manager import display_manager, display_sen
 from Store_Function.Device_Info import device_data
 from Etc_Function.Device_Connection_Check import connectionManager
 from Define_Value.Constan_Value import constant
-from Display_Function.Gui_Logger import redirect_stdout_to
+from Display_Function.Gui_Logger import create_text_output_frame
+
+
+# tkinter 창 설정정
+root = tk.Tk()
+root.title("Receiving Sensor Data from TTN MQTT Broker")
+root.geometry("800x600")
+
+# 여기서 텍스트 출력용 프레임과 텍스트 박스를 생성!
+_, text_box = create_text_output_frame(root)
 
 
 # DataManager를 생성할 때, device_data를 "밖에서" 인자로 주입
@@ -23,7 +32,8 @@ def on_connect(client, userdata, flags, rc):
 
 
 # MQTT 클라이언트 설정
-client = mqtt.Client()
+client = mqtt.Client(userdata={"text_box": text_box})
+#client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = mqtt_uplink_message_handler
 
@@ -37,19 +47,8 @@ client.tls_set()  # TLS 활성화
 # 브로커 연결
 client.connect("au1.cloud.thethings.network", 8883, 60)
 
-
-# tkinter GUI
-root = tk.Tk()
-root.title("센서 데이터 로그")
-
-text_area = tk.Text(root, height=30, width=100)
-text_area.pack(padx=10, pady=10)
-
-# 이 한 줄로 모든 모듈의 print가 GUI로 출력됨
-#redirect_stdout_to(text_area)
-
-
 # 오프라인 체크 시작
 data_manager.start_offline_checker()
 
-client.loop_forever()
+client.loop_start()
+root.mainloop()

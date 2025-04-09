@@ -2,7 +2,7 @@
 # @Author: Your name
 # @Date:   2025-04-09 09:03:50
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-09 13:46:04
+# @Last Modified time: 2025-04-09 15:30:55
 import time
 import threading
 
@@ -36,7 +36,7 @@ class connectionManager:
                 if last_time is not None:
                     diff = now - last_time.timestamp()
                     if diff >= self.timeout_seconds:
-                        print(f"[OFFLINE] {device_id} (no data for {self.timeout_seconds} seconds)")
+                        print(f"[OFFLINE] {device_id} (no data for {self.timeout_seconds} seconds)\n")
                         data["count"] = 0
                         data["on_line"] = False
 

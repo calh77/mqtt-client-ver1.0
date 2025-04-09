@@ -2,10 +2,11 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-04-07 14:03:27
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-09 11:09:36
+# @Last Modified time: 2025-04-09 15:18:11
 import json
 import base64
 from dateutil import parser
+import pytz
 from collections import defaultdict
 
 from Mqtt_Function.Downlink_Function import mqtt_downlink_message_sender
@@ -25,13 +26,18 @@ def mqtt_uplink_message_handler(client, userdata, msg):
             return
         
         deviceId = deviceInfo.get("device_id", "N/A")
-        utcTime = parser.isoparse(uplinkData.get("received_at", "1970-01-01T00:00:00Z"))
         uplinkDataHeader = decodedUplinkPayload.get("dataType", "N/A")
+        utcTime = parser.isoparse(uplinkData.get("received_at", "1970-01-01T00:00:00Z"))
+
+        # 한국 시간대 설정
+        kst = pytz.timezone("Asia/Seoul")
+        # 한국 시간대로 변환
+        koreaTime = utcTime.astimezone(kst)
 
         if uplinkDataHeader == "0x01":
             device_data[deviceId]["count"] += 1
             device_data[deviceId]["last_payload"] = decodedUplinkPayload
-            device_data[deviceId]["last_time"] = utcTime
+            device_data[deviceId]["last_time"] = koreaTime
             device_data[deviceId]["on_line"] = True
 
             count = device_data[deviceId]["count"]
@@ -39,10 +45,13 @@ def mqtt_uplink_message_handler(client, userdata, msg):
             averageTemperature = decodedUplinkPayload.get('averageTemperature', 'N/A')
             humidity = decodedUplinkPayload.get('humidity', 'N/A')
             pressure = decodedUplinkPayload.get('pressure', 'N/A')
+            print(koreaTime.strftime("%Y-%m-%d %H:%M:%S"))
             print(f"[{deviceId}] Count={count}, Header=0x{uplinkDataHeader}, Temp={temperature}°C, AvrTemp={averageTemperature}°C, Humidity={humidity}%, Pressure={pressure}hPa")
 
             if count % 3 == 0 or count == 1:
                 mqtt_downlink_message_sender(client, deviceId, count)
+            else:
+                print("")
 
     except Exception as e:
         print(f"Error: {str(e)}")

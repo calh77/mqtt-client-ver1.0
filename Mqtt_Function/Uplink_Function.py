@@ -11,11 +11,16 @@ from collections import defaultdict
 
 from Mqtt_Function.Downlink_Function import mqtt_downlink_message_sender
 from Store_Function.Device_Info import device_data
+from Display_Function.Data_Display import update_device_o2_graph
+from Display_Function.Data_Display import update_device_ch4_graph
 
 def mqtt_uplink_message_handler(client, userdata, msg):
     try:
-        text_box = userdata["text_box"]  # ← 반드시 이렇게 꺼내야 사용 가능!
-        
+        root = userdata["root"]     # 안전하게 가져옴
+        device_text_boxes = userdata["device_text_boxes"]
+        device_graphs = userdata["device_graphs"]
+
+        # MQTT 메시지 파싱
         uplinkData = json.loads(msg.payload)
         if not uplinkData.get("uplink_message"):
             print("Ignoring uplink message..")
@@ -65,14 +70,27 @@ def mqtt_uplink_message_handler(client, userdata, msg):
                 f"O2             : {O2Voltage:.3f}\n\n"
             )
 
+            # Text box 가져오기 또는 새로 만들기
+            if deviceId not in device_text_boxes:
+                from Display_Function.Data_Display import create_text_and_graph_frame
+                create_text_and_graph_frame(root, deviceId, device_text_boxes, device_graphs)
+
+            text_box = device_text_boxes[deviceId]
             text_box.insert("end", result)
             text_box.see("end")
+
+            # 특정 값 예: O2, CH4
+            if O2Voltage is not None:
+                update_device_o2_graph(deviceId, O2Voltage, device_graphs)
+            if CH4Value is not None:
+                update_device_ch4_graph(deviceId, CH4Value, device_graphs)
 
 
             if count % 3 == 0 or count == 1:
                 mqtt_downlink_message_sender(client, deviceId, count)
             else:
-                print("")
+                mqtt_downlink_message_sender(client, deviceId, count)
+#                print("")
 
     except Exception as e:
         print(f"Error: {str(e)}")

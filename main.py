@@ -5,13 +5,14 @@
 # @Last Modified time: 2025-04-09 17:13:28
 import paho.mqtt.client as mqtt
 import tkinter as tk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from Mqtt_Function.Uplink_Function import mqtt_uplink_message_handler
-from Display_Function.Device_Display_Manager import display_manager, display_sensor_data
 from Store_Function.Device_Info import device_data
 from Etc_Function.Device_Connection_Check import connectionManager
 from Define_Value.Constan_Value import constant
-from Display_Function.Gui_Logger import create_text_output_frame
+from Display_Function.Data_Display import create_text_and_graph_frame
 
 
 # tkinter 창 설정정
@@ -19,9 +20,13 @@ root = tk.Tk()
 root.title("Receiving Sensor Data from TTN MQTT Broker")
 root.geometry("800x600")
 
-# 여기서 텍스트 출력용 프레임과 텍스트 박스를 생성!
-_, text_box = create_text_output_frame(root)
+# 여기서 안내용 텍스트 출력용 프레임과 텍스트 박스를 생성!
+#_, text_box = create_text_output_frame(root)
+# 개별 센서 노드별 출력 박스 생성
+device_text_boxes = {}
 
+# 디바이스별 그래프 저장할 딕셔너리  (⭐️ 추가 필요)
+device_graphs = {}
 
 # DataManager를 생성할 때, device_data를 "밖에서" 인자로 주입
 data_manager = connectionManager(device_data=device_data, check_interval=constant.CHECK_INTERVAL, timeout_seconds=constant.TIMEOUT_LIMIT)
@@ -32,7 +37,9 @@ def on_connect(client, userdata, flags, rc):
 
 
 # MQTT 클라이언트 설정
-client = mqtt.Client(userdata={"text_box": text_box})
+client = mqtt.Client(userdata={"device_text_boxes": device_text_boxes,
+                               "device_graphs": device_graphs,
+                               "root": root})
 #client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = mqtt_uplink_message_handler

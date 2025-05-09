@@ -2,15 +2,12 @@
 # @Author: Your name
 # @Date:   2025-04-08 07:51:06
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-09 09:10:26
+# @Last Modified time: 2025-05-09 13:48:57
 import json
 import base64
 
-def mqtt_downlink_message_sender(client, deviceId, count):
-    if count == 1:
-        downlinkPayloadByte = b'\x21'
-    else:
-        downlinkPayloadByte = b'\x11'
+def mqtt_downlink_message_sender(client, deviceId):
+    downlinkPayloadByte = b'\x21'
     downlinkPayload = {
         "downlinks": [
             {

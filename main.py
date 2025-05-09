@@ -2,7 +2,7 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-03-28 10:38:44
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-09 17:13:28
+# @Last Modified time: 2025-05-09 13:26:25
 import paho.mqtt.client as mqtt
 import tkinter as tk
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ root.title("Receiving Sensor Data from TTN MQTT Broker")
 root.geometry("800x600")
 
 # 여기서 안내용 텍스트 출력용 프레임과 텍스트 박스를 생성!
-#_, text_box = create_text_output_frame(root)
+#_, text_box = create_text_and_graph_frame(root)
 # 개별 센서 노드별 출력 박스 생성
 device_text_boxes = {}
 

@@ -2,7 +2,7 @@
 # @Author: Chang SeungHyeock
 # @Date:   2025-04-07 14:03:27
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-05-07 15:04:50
+# @Last Modified time: 2025-05-09 15:15:22
 import json
 import base64
 from dateutil import parser
@@ -13,6 +13,7 @@ import Define_Value.Constan_Value
 
 from Mqtt_Function.Downlink_Function import mqtt_downlink_message_sender
 from Store_Function.Device_Info import device_data
+from Display_Function.Data_Display import create_text_and_graph_frame
 from Display_Function.Data_Display import update_device_o2_graph
 from Display_Function.Data_Display import update_device_ch4_graph
 
@@ -52,7 +53,19 @@ def mqtt_uplink_message_handler(client, userdata, msg):
         device_data[deviceId]["last_time"] = koreaTime
         device_data[deviceId]["on_line"] = True
 
-        if alarmInfo == "0x00":
+        result = ""
+        print(f"[{deviceId}] Module Type={moduleInfo}, Alarm Info={alarmInfo}")
+        if alarmInfo == "0x0f" or alarmInfo == "0x0F":
+            print(koreaTime.strftime("%Y-%m-%d %H:%M:%S"))
+            print(f"[{deviceId}] Module Type={moduleInfo}, Alarm Info={alarmInfo}")
+            result = (
+                f"Device ID      : {deviceId}\n"
+                f"Receiving Time : {koreaTime.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Module and Alarm Info(HEX) : 0x{moduleInfo}, 0x{alarmInfo}\n\n\n"
+            )
+            mqtt_downlink_message_sender(client, deviceId)
+            print("")
+        elif alarmInfo == "0x00":
             count = device_data[deviceId]["count"]
             temperature = decodedUplinkPayload.get("temperature", "N/A")
             humidity = decodedUplinkPayload.get("humidity", "N/A")
@@ -61,11 +74,11 @@ def mqtt_uplink_message_handler(client, userdata, msg):
                 sensingGas = decodedUplinkPayload.get("measureGas", "N/A")
                 concentration = decodedUplinkPayload.get('concentration', 'N/A')
                 print(koreaTime.strftime("%Y-%m-%d %H:%M:%S"))
-                print(f"[{deviceId}] Count={count}, Module Type=0x{moduleInfo}, Alarm Info=0x{alarmInfo}")
+                print(f"[{deviceId}] Count={count}, Module Type={moduleInfo}, Alarm Info={alarmInfo}")
                 print(f"Temp={temperature:.2f}°C, Humidity={humidity:.2f}%, Pressure={pressure:.0f}hPa, {sensingGas} Concentration={concentration:.2f}%")
                 result = (
                     f"Device ID      : {deviceId}\n"
-                    f"Receiving Time : {koreaTime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    f"Receiving Time : {koreaTime.strftime('%Y-%m-%d %H:%M:%S')}\n"
                     f"Module and Alarm Info(HEX) : 0x{moduleInfo}, 0x{alarmInfo}\n"
                     f"T/H/P : {temperature:.2f}°C, {humidity:.2f}%, {pressure:.0f}hpa\n"
                     f"{sensingGas} Concentration: {concentration:.2f}%\n"
@@ -92,7 +105,7 @@ def mqtt_uplink_message_handler(client, userdata, msg):
 
                 result = (
                     f"Device ID      : {deviceId}\n"
-                    f"Receiving Time : {koreaTime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    f"Receiving Time : {koreaTime.strftime('%Y-%m-%d %H:%M:%S')}\n"
                     f"Module and Alarm Info(HEX) : 0x{moduleInfo}, 0x{alarmInfo}\n"
                     f"T/H/P : {temperature:.2f}°C, {humidity:.2f}%, {pressure:.0f}hpa\n"
                 )
@@ -103,30 +116,35 @@ def mqtt_uplink_message_handler(client, userdata, msg):
                 if H2SConcentration != "N/A":
                     result += f", H2S Con. : {H2SConcentration:.2f}%"
                 if CH4Concentration != "N/A":
-                    result += f", CH4 Con. : {CH4Concentration:.2f}%\n"
+                    result += f", CH4 Con. : {CH4Concentration:.2f}%"
+                result += "\n"
 #        else:
 
-        # Text box 가져오기 또는 새로 만들기
+#        # Text box 가져오기 또는 새로 만들기
+#        if deviceId not in device_text_boxes:
+#            from Display_Function.Data_Display import create_text_and_graph_frame
+#            create_text_and_graph_frame(root, deviceId, device_text_boxes, device_graphs)
+#            root.after(0, create_text_and_graph_frame, root, deviceId, device_text_boxes, device_graphs)
+
+        # 메시지 처리 콜백 안에서…
         if deviceId not in device_text_boxes:
-            from Display_Function.Data_Display import create_text_and_graph_frame
-            create_text_and_graph_frame(root, deviceId, device_text_boxes, device_graphs)
+            # 1) 프레임 생성 예약
+            root.after(0, create_text_and_graph_frame, root, deviceId, device_text_boxes, device_graphs)
+            # 2) 텍스트 삽입도 같은 시점(0ms) 이후에 예약
+            root.after(0, lambda: (
+                device_text_boxes[deviceId].insert("end", result),
+                device_text_boxes[deviceId].see("end")
+            ))
+        else:
+            # 이미 생성되어 있으면 바로 삽입 예약
+            root.after(0, lambda: (
+                device_text_boxes[deviceId].insert("end", result),
+                device_text_boxes[deviceId].see("end")
+            ))
 
-        text_box = device_text_boxes[deviceId]
-        text_box.insert("end", result)
-        text_box.see("end")
-
-        # 특정 값 예: O2, CH4
-#        if O2Voltage is not None:
-#            update_device_o2_graph(deviceId, O2Voltage, device_graphs)
-#        if CH4Value is not None:
-#            update_device_ch4_graph(deviceId, CH4Value, device_graphs)
-
-
-#        if count % 3 == 0 or count == 1:
-#            mqtt_downlink_message_sender(client, deviceId, count)
-#        else:
-#            mqtt_downlink_message_sender(client, deviceId, count)
-#                print("")
+#        text_box = device_text_boxes[deviceId]
+#        text_box.insert("end", result)
+#        text_box.see("end")
 
     except Exception as e:
         print(f"Error: {str(e)}")

@@ -2,7 +2,7 @@
 # @Author: Your name
 # @Date:   2025-04-29 12:54:54
 # @Last Modified by:   Your name
-# @Last Modified time: 2025-04-29 13:18:05
+# @Last Modified time: 2025-05-09 15:17:58
 import tkinter as tk
 from tkinter import ttk
 
@@ -38,55 +38,15 @@ def create_text_and_graph_frame(master, device_id, device_text_boxes, device_gra
     label.pack(anchor="w", padx=5)
 
     # Text 박스
-    text_box = tk.Text(frame, height=8, font=("Consolas", 10))
+    text_box = tk.Text(frame, height=6, font=("Consolas", 10))
     text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(5,0))
 
 #    scrollbar = tk.Scrollbar(frame, command=text_box.yview)
 #    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 #    text_box.config(yscrollcommand=scrollbar.set)
 
-    # O2 그래프 생성
-    fig1, ax1 = plt.subplots(figsize=(4,2))
-    ax1.set_title("O2 Voltage")
-    ax1.set_xlabel("Time")
-    ax1.set_ylabel("Value")
-
-    # X축 포맷 정수로 표시
-    ax1.xaxis.set_major_formatter(ticker.FormatStrFormatter("%d"))
-    # Y축 포맷 소수점 3자리로 지정
-    ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.3f"))
-    # Y축 범위 고정 설정 (예: 0.000 ~ 2.000)
-    ax1.set_ylim(0.000, 2.000)
-
-    fig1.subplots_adjust(left=0.2)
-
-    canvas1 = FigureCanvasTkAgg(fig1, master=frame)
-    canvas1.draw()
-    canvas1.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=False, padx=(5,5))
-
-    # CH42 그래프 생성
-    fig2, ax2 = plt.subplots(figsize=(4,2))
-    ax2.set_title("CH4 Concentration")
-    ax2.set_xlabel("Time")
-    ax2.set_ylabel("Value")
-
-    ax2.xaxis.set_major_formatter(ticker.FormatStrFormatter("%d"))
-    ax2.yaxis.set_major_formatter(ticker.FormatStrFormatter("%d"))
-    ax2.set_ylim(0, 4500)
-
-    fig2.subplots_adjust(left=0.2)
-
-    canvas2 = FigureCanvasTkAgg(fig2, master=frame)
-    canvas2.draw()
-    canvas2.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=False, padx=(5,5))
-
-
     # 생성한 text_box를 dict에 등록
     device_text_boxes[device_id] = text_box
-    device_graphs[device_id] = {
-        "o2": {"fig": fig1, "ax": ax1, "canvas": canvas1, "data_x": [], "data_y": []},
-        "ch4": {"fig": fig2, "ax": ax2, "canvas": canvas2, "data_x": [], "data_y": []}
-    }
     return frame, text_box
 
 
